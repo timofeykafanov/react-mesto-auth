@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import api from "../utils/Api.js";
 
 import Header from "./Header.js";
@@ -10,7 +10,12 @@ import ImagePopup from "./ImagePopup.js";
 import EditProfilePopup from "./EditProfilePopup.js";
 import EditAvatarPopup from "./EditAvatarPopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
+import Register from "./Register.js";
+import Login from "./Login.js";
+import ProtectedRoute from "./ProtectedRoute.js";
+import * as auth from '../utils/auth.js';
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
+import InfoTooltip from "./InfoTooltip.js";
 
 function App() {
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -99,6 +104,16 @@ function App() {
         });
     }
 
+    function handleRegistration(formData) {
+        if (formData.password === formData.confirmPassword) {
+            auth.register(formData.username, formData.password, formData.email, formData.calGoal)
+              .then((res) => {
+                Navigate("/login");
+              })
+              .catch(err => console.log(err));
+          }
+    }
+
     useEffect(() => {
         Promise.all([api.getUserInfo(), api.getInitialCards()])
         .then(([user, cards]) => {
@@ -112,19 +127,28 @@ function App() {
 
     return (
         <CurrentUserContext.Provider value={currentUser}>
-            <Header />
+            <Header loggedIn={loggedIn} />
             
-            {/* <Routes>
-                <Route path="/sign-up">
+            <Routes>
+                <Route path="/sign-up" element={<Register handleRegistration={handleRegistration} />} />
 
+                <Route path="/sign-in" element={<Login />} />
+                
+                <Route path="/" element={
+                <ProtectedRoute>
+                    <Main
+                        onAddPlace={handleAddPlaceClick}
+                        onEditProfile={handleEditProfileClick}
+                        onEditAvatar={handleEditAvatarClick}
+                        cards={cards}
+                        onCardLike={handleCardLike}
+                        onCardDelete={handleCardDelete}
+                        onCardClick={handleCardClick}
+                        setCards={setCards}
+                    />
+                </ProtectedRoute>} loggedIn={loggedIn}>
                 </Route>
-                <Route path="/sign-in">
-
-                </Route>
-                <ProtectedRoute path="/">
-
-                </ProtectedRoute>
-            </Routes> */}
+            </Routes>
 
             {/* <Main
                 onAddPlace={handleAddPlaceClick}
@@ -135,46 +159,17 @@ function App() {
                 onCardDelete={handleCardDelete}
                 onCardClick={handleCardClick}
                 setCards={setCards}
-            />
+            /> */}
 
-            <Footer /> */}
-
-            {/* <form className="form">
-                <h2 className="form__heading">Регистрация</h2>
-                <input className="form__input" type="email" placeholder="Email"></input>
-                <input className="form__input" type="password" placeholder="Пароль"></input>
-                <button className="form__button" type="submit">Зарегистрироваться</button>
-                <p className="form__text">Уже зарегистрированы? <a className="form__link" href="/">Войти</a></p>
-            </form> */}
-
-            {/* <form className="form">
-                <h2 className="form__heading">Вход</h2>
-                <input className="form__input" type="email" placeholder="Email"></input>
-                <input className="form__input" type="password" placeholder="Пароль"></input>
-                <button className="form__button" type="submit">Войти</button>
-            </form> */}
-
-            {/* <div className="popup popup_opened">
-                <div className="popup__content popup__content_type_confirm">
-                    <button className="popup__close" type="button"></button>
-                    <div className="popup__icon popup__icon_type_confirm"></div>
-                    <p className="popup__text">Вы успешно зарегистрировались!</p>
-                </div>
-            </div> */}
-
-            {/* <div className="popup popup_opened">
-                <div className="popup__content popup__content_type_confirm">
-                    <button className="popup__close" type="button"></button>
-                    <div className="popup__icon popup__icon_type_error"></div>
-                    <p className="popup__text">Что-то пошло не так! Попробуйте ещё раз.</p>
-                </div>
-            </div> */}
+            <Footer />
 
             <AddPlacePopup onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} />
 
             <EditProfilePopup onUpdateUser={handleUpdateUser} isOpen={isEditProfilePopupOpen} onClose={closeAllPopups} />
 
-            <EditAvatarPopup onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} /> 
+            <EditAvatarPopup onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} />
+
+            {/* <InfoTooltip /> */}
 
             <PopupWithForm name="delete" title="Вы уверены?" />
 
