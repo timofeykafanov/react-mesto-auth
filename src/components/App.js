@@ -126,8 +126,9 @@ function App() {
 
     function handleLogin(email, password) {
         auth.login(email, password)
-        .then((res) => {
-            console.log(res)
+        .then((data) => {
+            console.log(data)
+            localStorage.setItem('token', data.token);
             setLoggedIn(true)
             setCurrentEmail(email)
             navigate('/');
@@ -135,10 +136,31 @@ function App() {
         .catch(err => console.log(err))
     }
 
+    console.log(localStorage)
+
     function handleLogout() {
-        setCurrentEmail('');
+        localStorage.removeItem('token');
         navigate('/sign-in')
+        setLoggedIn(false)
     }
+
+    useEffect(() => {
+        if (localStorage.getItem("token")) {
+            const jwt = localStorage.getItem("token");
+            auth.checkToken(jwt)
+            .then((res) => {
+                console.log(res)
+                if (res.data.email) {
+                    setCurrentEmail(res.data.email)
+                    navigate('/')
+                    setLoggedIn(true);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+        }
+    }, [navigate])
 
     useEffect(() => {
         Promise.all([api.getUserInfo(), api.getInitialCards()])
