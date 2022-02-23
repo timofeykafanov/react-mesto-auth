@@ -5,7 +5,6 @@ import api from "../utils/Api.js";
 import Header from "./Header.js";
 import Main from "./Main.js";
 import Footer from "./Footer.js";
-import PopupWithForm from "./PopupWithForm.js";
 import ImagePopup from "./ImagePopup.js";
 import EditProfilePopup from "./EditProfilePopup.js";
 import EditAvatarPopup from "./EditAvatarPopup.js";
@@ -147,8 +146,8 @@ function App() {
             auth.checkToken(jwt)
             .then((res) => {
                 if (res.data.email) {
-                    setCurrentEmail(res.data.email)
-                    navigate('/')
+                    setCurrentEmail(res.data.email);
+                    navigate('/');
                     setLoggedIn(true);
                 }
             })
@@ -174,24 +173,23 @@ function App() {
             <Header email={currentEmail} handleLogout={handleLogout} sucсess={sucсess} />
             
             <Routes>
+                <Route path="/" element={
+                    <ProtectedRoute loggedIn={loggedIn}>
+                        <Main
+                            onAddPlace={handleAddPlaceClick}
+                            onEditProfile={handleEditProfileClick}
+                            onEditAvatar={handleEditAvatarClick}
+                            cards={cards}
+                            onCardLike={handleCardLike}
+                            onCardDelete={handleCardDelete}
+                            onCardClick={handleCardClick}
+                        />
+                    </ProtectedRoute>} >
+                </Route>
+
                 <Route path="/sign-up" element={<Register handleRegistration={handleRegistration} />} />
 
                 <Route path="/sign-in" element={<Login handleLogin={handleLogin} />} />
-                
-                <Route path="/" element={
-                <ProtectedRoute loggedIn={loggedIn}>
-                    <Main
-                        onAddPlace={handleAddPlaceClick}
-                        onEditProfile={handleEditProfileClick}
-                        onEditAvatar={handleEditAvatarClick}
-                        cards={cards}
-                        onCardLike={handleCardLike}
-                        onCardDelete={handleCardDelete}
-                        onCardClick={handleCardClick}
-                        setCards={setCards}
-                    />
-                </ProtectedRoute>} loggedIn={loggedIn}>
-                </Route>
             </Routes>
 
             <Footer />
