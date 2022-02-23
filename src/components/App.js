@@ -127,7 +127,6 @@ function App() {
     function handleLogin(email, password) {
         auth.login(email, password)
         .then((data) => {
-            console.log(data)
             localStorage.setItem('token', data.token);
             setLoggedIn(true)
             setCurrentEmail(email)
@@ -135,8 +134,6 @@ function App() {
         })
         .catch(err => console.log(err))
     }
-
-    console.log(localStorage)
 
     function handleLogout() {
         localStorage.removeItem('token');
@@ -149,7 +146,6 @@ function App() {
             const jwt = localStorage.getItem("token");
             auth.checkToken(jwt)
             .then((res) => {
-                console.log(res)
                 if (res.data.email) {
                     setCurrentEmail(res.data.email)
                     navigate('/')
@@ -198,17 +194,6 @@ function App() {
                 </Route>
             </Routes>
 
-            {/* <Main
-                onAddPlace={handleAddPlaceClick}
-                onEditProfile={handleEditProfileClick}
-                onEditAvatar={handleEditAvatarClick}
-                cards={cards}
-                onCardLike={handleCardLike}
-                onCardDelete={handleCardDelete}
-                onCardClick={handleCardClick}
-                setCards={setCards}
-            /> */}
-
             <Footer />
 
             <AddPlacePopup onAddPlace={handleAddPlaceSubmit} isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} />
@@ -218,8 +203,6 @@ function App() {
             <EditAvatarPopup onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} />
 
             <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} sucсess={sucсess} />
-
-            <PopupWithForm name="delete" title="Вы уверены?" />
 
             <ImagePopup card={selectedCard} onClose={closeAllPopups} />
         </CurrentUserContext.Provider>
