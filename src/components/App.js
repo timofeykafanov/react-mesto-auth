@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import api from "../utils/Api.js";
 
 import Header from "./Header.js";
@@ -25,6 +25,10 @@ function App() {
     const [selectedCard, setSelectedCard] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const [loggedIn, setLoggedIn] = useState(false);
+    const [currentEmail, setCurrentEmail] = useState('');
+    const [sucсess, setSuccess] = useState(false);
+    const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+    const navigate = useNavigate();
 
     const handleEditAvatarClick = () => {
         setIsEditAvatarPopupOpen(true);
@@ -47,6 +51,7 @@ function App() {
         setIsAddPlacePopupOpen(false);
         setIsEditAvatarPopupOpen(false);
         setSelectedCard({});
+        setIsInfoTooltipOpen(false)
     };
 
     function handleUpdateUser(inputValues) {
@@ -104,14 +109,35 @@ function App() {
         });
     }
 
-    function handleRegistration(formData) {
-        if (formData.password === formData.confirmPassword) {
-            auth.register(formData.username, formData.password, formData.email, formData.calGoal)
-              .then((res) => {
-                Navigate("/login");
-              })
-              .catch(err => console.log(err));
-          }
+    function handleRegistration(email, password) {
+        auth.register(email, password)
+        .then((res) => {
+            setSuccess(true)
+            setIsInfoTooltipOpen(true)
+            navigate("/sign-in");
+        })
+        .catch((err) => {
+            console.log(err)
+            setIsInfoTooltipOpen(true)
+            setSuccess(false)
+        })
+
+    }
+
+    function handleLogin(email, password) {
+        auth.login(email, password)
+        .then((res) => {
+            console.log(res)
+            setLoggedIn(true)
+            setCurrentEmail(email)
+            navigate('/');
+        })
+        .catch(err => console.log(err))
+    }
+
+    function handleLogout() {
+        setCurrentEmail('');
+        navigate('/sign-in')
     }
 
     useEffect(() => {
@@ -127,15 +153,15 @@ function App() {
 
     return (
         <CurrentUserContext.Provider value={currentUser}>
-            <Header loggedIn={loggedIn} />
+            <Header email={currentEmail} handleLogout={handleLogout} sucсess={sucсess} />
             
             <Routes>
                 <Route path="/sign-up" element={<Register handleRegistration={handleRegistration} />} />
 
-                <Route path="/sign-in" element={<Login />} />
+                <Route path="/sign-in" element={<Login handleLogin={handleLogin} />} />
                 
                 <Route path="/" element={
-                <ProtectedRoute>
+                <ProtectedRoute loggedIn={loggedIn}>
                     <Main
                         onAddPlace={handleAddPlaceClick}
                         onEditProfile={handleEditProfileClick}
@@ -169,7 +195,7 @@ function App() {
 
             <EditAvatarPopup onUpdateAvatar={handleUpdateAvatar} isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups} />
 
-            {/* <InfoTooltip /> */}
+            <InfoTooltip isOpen={isInfoTooltipOpen} onClose={closeAllPopups} sucсess={sucсess} />
 
             <PopupWithForm name="delete" title="Вы уверены?" />
 
